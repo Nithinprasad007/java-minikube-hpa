@@ -1,3 +1,5 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
 metadata:
   name: hello-world-hpa
 spec:
@@ -20,4 +22,4 @@ spec:
       policies:
         - type: Percent
           value: 100
-          periodSeconds: 5  # Scale down in 5 seconds
+          periodSeconds: 5  # Scale down aggressively
