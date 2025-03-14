@@ -1,87 +1,69 @@
-Java Minikube HPA
+# Java Minikube HPA Setup
 
-This project demonstrates how to deploy a Java-based application on Minikube with Horizontal Pod Autoscaling (HPA). It includes setting up Minikube, deploying the application, enabling HPA, and performing load testing to verify autoscaling.
+This project demonstrates how to deploy a Java application in Minikube with Horizontal Pod Autoscaler (HPA). The application automatically scales between 1 to 5 pods based on CPU usage.
 
-Prerequisites
+## Prerequisites
 
-Before running the project, ensure you have the following installed:
+Ensure you have the following installed:
 
-Minikube - Installation Guide
+- [Docker](https://docs.docker.com/engine/install/ubuntu/)
+- [Minikube](https://minikube.sigs.k8s.io/docs/start/)
+- [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
+- [Metrics Server](https://github.com/kubernetes-sigs/metrics-server)
+- [Hey (Load Testing Tool)](https://github.com/rakyll/hey)
 
-Kubectl - Installation Guide
+## Steps to Run the Project
 
-Docker - Installation Guide
+```sh
+# 1. Start Minikube
+minikube start
 
-Hey (Load Testing Tool) - Installation Guide
-
-Setup Instructions
-
-1. Start Minikube
-
-minikube start --cpus=4 --memory=4g
-
-2. Enable Metrics Server
-
+# 2. Enable Metrics Server
 minikube addons enable metrics-server
 
-3. Clone the Repository
-
-git clone https://github.com/Nithinprasad007/java-minikube-hpa.git
-cd java-minikube-hpa
-
-4. Build and Push Docker Image
-
-Replace <your-dockerhub-username> with your actual Docker Hub username.
-
+# 3. Build and Push Docker Image  
+# Replace <your-dockerhub-username> with your actual Docker Hub username.
 docker build -t <your-dockerhub-username>/hello-world-java .
-docker login
 docker push <your-dockerhub-username>/hello-world-java
 
-5. Update Deployment File
+# 4. Edit deployment.yaml  
+# Update the image field inside deployment.yaml to use your Docker Hub username.
+# Open the file and update:
+# containers:
+# - name: hello-world
+#   image: <your-dockerhub-username>/hello-world-java
 
-Edit deployment.yaml and replace the image name with your actual Docker Hub repository:
-
-        image: <your-dockerhub-username>/hello-world-java
-
-6. Deploy Application to Minikube
-
+# 5. Deploy Application to Minikube
 kubectl apply -f deployment.yaml
 
-7. Verify Deployment
-
+# 6. Verify Pods and Services
 kubectl get pods
 kubectl get svc
 
-8. Enable Horizontal Pod Autoscaler (HPA)
-
+# 7. Enable Horizontal Pod Autoscaler (HPA)
 kubectl autoscale deployment hello-world --cpu-percent=50 --min=1 --max=5
 
-9. Load Testing (Trigger Scaling)
+# 8. Check HPA Status
+kubectl get hpa
 
-Run a load test that gradually increases the load on the application.
-
+# 9. Load Test to Scale Pods  
+# This command will gradually increase the load on the service.
 hey -z 60s -c 100 http://$(minikube service hello-world-service --url)
 
-10. Monitor Scaling
-
+# 10. Monitor Scaling in Real-time
 kubectl get hpa --watch
 kubectl get pods --watch
 
-11. Cleanup
-
-To stop all services, delete pods, and remove images:
-
-kubectl delete -f deployment.yaml
+# 11. Stop and Cleanup
+kubectl delete deployment hello-world
+kubectl delete service hello-world-service
 kubectl delete hpa hello-world
 minikube delete
 
-References
-
-Minikube: https://minikube.sigs.k8s.io/docs/
-
-Kubectl: https://kubernetes.io/docs/reference/kubectl/overview/
-
-Docker: https://docs.docker.com/
-
-Hey Load Testing Tool: https://github.com/rakyll/hey
-
+# 13. References  
+# Kubernetes Docs: https://kubernetes.io/docs/
+# Minikube Docs: https://minikube.sigs.k8s.io/docs/
+# HPA: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+# Docker Hub: https://hub.docker.com/
+# Metrics Server: https://github.com/kubernetes-sigs/metrics-server
+# Hey Load Testing Tool: https://github.com/rakyll/hey
